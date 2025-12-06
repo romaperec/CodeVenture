@@ -5,7 +5,7 @@ class UserCreate(BaseModel):
     id: int
     username: str
     email: str
-    hashed_password: str
+    password: str
 
 
 class UserResponse(BaseModel):

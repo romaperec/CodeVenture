@@ -17,41 +17,19 @@ class UserService:
         existing_user = await self.db.execute(select(User).where(User.id == id))
         existing_user = existing_user.scalar_one_or_none()
 
-        if existing_user is None:
-            logger.warning(f"Пользователь с id: {id} не был найден в базе данных.")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found by id"
-            )
-
-        return UserResponse(
-            id=existing_user.id,
-            username=existing_user.username,
-            email=existing_user.email,
-        )
+        return existing_user
 
     async def get_by_email(self, email: str):
         existing_user = await self.db.execute(select(User).where(User.email == email))
         existing_user = existing_user.scalar_one_or_none()
 
-        if existing_user is None:
-            logger.warning(
-                f"Пользователь с email: {email} не был найден в базе данных."
-            )
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found by email"
-            )
-
-        return UserResponse(
-            id=existing_user.id,
-            username=existing_user.username,
-            email=existing_user.email,
-        )
+        return existing_user
 
     async def create_user(self, schema: UserCreate):
         new_user = User(
             username=schema.username,
             email=schema.email,
-            password=schema.hashed_password,
+            password=schema.password,
         )
         self.db.add(new_user)
         await self.db.commit()
