@@ -1,8 +1,8 @@
 import asyncio
 from fastapi import HTTPException, status
 from loguru import logger
-from app.core.security import hash_password
-from app.modules.auth.schemas import UserRegister
+from app.core.security import hash_password, verify_password
+from app.modules.auth.schemas import UserLogin, UserRegister, UserResponse
 from app.modules.users.service import UserService
 
 
@@ -26,3 +26,31 @@ class AuthService:
         schema.password = hashed_password
 
         return await self.user_service.create_user(schema)
+
+    async def login_user(self, schema: UserLogin):
+        existing_user = await self.user_service.get_by_email(schema.email)
+
+        if existing_user is None:
+            logger.warning(
+                f"Неудачная попытка входа. Пользователя с email: {schema.email} не существует."
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
+
+        correct_password = await asyncio.to_thread(
+            verify_password, schema.password, existing_user.password
+        )
+
+        if not correct_password:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
+
+        return UserResponse(
+            username=existing_user.username,
+            email=existing_user.email,
+            description=existing_user.description,
+        )
