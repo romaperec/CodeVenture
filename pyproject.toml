@@ -16,8 +16,3 @@ dependencies = [
     "uvicorn[standard]>=0.38.0",
 ]
 
-[dependency-groups]
-dev = [
-    "faker>=38.2.0",
-    "locust>=2.42.6",
-]
