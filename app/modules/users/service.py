@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 
 from loguru import logger
 
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,14 +11,30 @@ from app.modules.users.schemas import UserCreate, UserResponse
 
 
 class UserService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, redis_client: Redis):
+        self.redis = redis_client
         self.db = db
 
-    async def get_by_id(self, id: int):
+    async def get_by_id(self, id: int) -> UserResponse:
+        cached_user = await self.redis.get(f"user:{id}")
+        if cached_user:
+            logger.debug(f"Пользователь с id: {id} был получен из кэша.")
+            return UserResponse.model_validate_json(cached_user)
+
+        logger.debug(f"Пользователь с id: {id} не был найден в кэше.")
         existing_user = await self.db.execute(select(User).where(User.id == id))
         existing_user = existing_user.scalar_one_or_none()
 
-        return existing_user
+        if existing_user is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+
+        user_schema = UserResponse.model_validate(existing_user)
+
+        await self.redis.set(f"user:{id}", user_schema.model_dump_json(), ex=300)
+
+        return user_schema
 
     async def get_by_email(self, email: str):
         existing_user = await self.db.execute(select(User).where(User.email == email))

@@ -1,18 +1,29 @@
-import redis.asyncio as redis
+from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+from loguru import logger
+from redis.asyncio import ConnectionPool, Redis
 from app.core.config import settings
 
-r = redis.Redis(
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    password=settings.REDIS_PASSWORD,
-    decode_responses=True,
-    ssl=False,
-)
+redis_pool = None
 
 
-async def check_redis():
-    try:
-        return await r.ping()
-    except Exception:
-        return False
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global redis_pool
+
+    redis_pool = ConnectionPool(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        password=settings.REDIS_PASSWORD,
+        decode_responses=True,
+    )
+    logger.info("Redis connection pool создан.")
+    yield
+
+    await redis_pool.disconnect()
+    logger.info("Redis connection pool закрыт.")
+
+
+async def get_redis_client() -> Redis:
+    return Redis(connection_pool=redis_pool)

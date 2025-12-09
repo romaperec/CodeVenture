@@ -4,7 +4,7 @@ from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.auth.service import AuthService
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.get("/")
