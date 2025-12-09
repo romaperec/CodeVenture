@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI):
         port=settings.REDIS_PORT,
         password=settings.REDIS_PASSWORD,
         decode_responses=True,
+        max_connections=100,
     )
     logger.info("Redis connection pool создан.")
     yield
