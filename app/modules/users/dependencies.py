@@ -7,8 +7,14 @@ from app.core.redis import get_redis_client
 from app.modules.users.service import UserService
 
 
-def get_user_service(
+def get_full_user_service(
+    redis_client: Redis = Depends(get_redis_client),
     db: AsyncSession = Depends(get_session),
+) -> UserService:
+    return UserService(redis_client=redis_client, db=db)
+
+
+def get_cached_user_service(
     redis_client: Redis = Depends(get_redis_client),
 ) -> UserService:
-    return UserService(db, redis_client)
+    return UserService(redis_client=redis_client)

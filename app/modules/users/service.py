@@ -6,29 +6,38 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.db_helper import sessionmaker as async_session_factory
 from app.modules.users.models import User
 from app.modules.users.schemas import UserCreate, UserResponse
 
 
 class UserService:
-    def __init__(self, db: AsyncSession, redis_client: Redis):
+    def __init__(self, redis_client: Redis, db: AsyncSession | None = None):
         self.redis = redis_client
         self.db = db
 
     async def get_by_id(self, id: int) -> UserResponse:
         cached_user = await self.redis.get(f"user:{id}")
         if cached_user:
-            logger.debug(f"Пользователь с id: {id} был получен из кэша.")
             return UserResponse.model_validate_json(cached_user)
 
-        logger.debug(f"Пользователь с id: {id} не был найден в кэше.")
-        existing_user = await self.db.execute(select(User).where(User.id == id))
-        existing_user = existing_user.scalar_one_or_none()
+        if self.db:
+            existing_user = await self.db.execute(select(User).where(User.id == id))
+            existing_user = existing_user.scalar_one_or_none()
 
-        if existing_user is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-            )
+            if existing_user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                )
+        else:
+            async with async_session_factory() as temp_db:
+                existing_user = await temp_db.execute(select(User).where(User.id == id))
+                existing_user = existing_user.scalar_one_or_none()
+
+                if existing_user is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                    )
 
         user_schema = UserResponse.model_validate(existing_user)
 
