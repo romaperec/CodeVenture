@@ -20,7 +20,9 @@ class UserService:
             return UserResponse.model_validate_json(cached_user)
 
         if self.db:
-            existing_user = await self.db.execute(select(User).where(User.id == id))
+            existing_user = await self.db.execute(
+                select(User).where(User.id == id)
+            )
             existing_user = existing_user.scalar_one_or_none()
 
             if existing_user is None:
@@ -30,7 +32,9 @@ class UserService:
                 )
         else:
             async with async_session_factory() as temp_db:
-                existing_user = await temp_db.execute(select(User).where(User.id == id))
+                existing_user = await temp_db.execute(
+                    select(User).where(User.id == id)
+                )
                 existing_user = existing_user.scalar_one_or_none()
 
                 if existing_user is None:
@@ -41,12 +45,16 @@ class UserService:
 
         user_schema = UserResponse.model_validate(existing_user)
 
-        await self.redis.set(f"user:{id}", user_schema.model_dump_json(), ex=300)
+        await self.redis.set(
+            f"user:{id}", user_schema.model_dump_json(), ex=300
+        )
 
         return user_schema
 
     async def get_by_email(self, email: str):
-        existing_user = await self.db.execute(select(User).where(User.email == email))
+        existing_user = await self.db.execute(
+            select(User).where(User.email == email)
+        )
         existing_user = existing_user.scalar_one_or_none()
 
         return existing_user
@@ -70,7 +78,9 @@ class UserService:
         existing_user = existing_user.scalar_one_or_none()
 
         if existing_user is None:
-            logger.warning(f"Пользователь с id: {id} не был найден в базе данных.")
+            logger.warning(
+                f"Пользователь с id: {id} не был найден в базе данных."
+            )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found by id",

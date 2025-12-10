@@ -24,7 +24,9 @@ class AuthService:
                 detail="Email already registered",
             )
 
-        hashed_password = await asyncio.to_thread(hash_password, schema.password)
+        hashed_password = await asyncio.to_thread(
+            hash_password, schema.password
+        )
         schema.password = hashed_password
 
         return await self.user_service.create_user(schema)

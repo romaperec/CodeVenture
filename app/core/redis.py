@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from redis.asyncio import ConnectionPool, Redis
+
 from app.core.config import settings
 
 redis_pool: ConnectionPool | None = None
