@@ -4,7 +4,6 @@ from app.core.redis import lifespan
 from app.modules.auth.router import router as auth_router
 from app.modules.users.router import router as users_router
 
-
 app = FastAPI(title="CodeVenture API", lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(users_router)

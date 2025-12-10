@@ -12,6 +12,7 @@ Coming soon...
 ## Todo
 
 - [] Add JWT Tokens
+- [] Add OAuth 2.0
 - [] Add sending Email
 - [] Integration Taskiq
 - [] Add items module

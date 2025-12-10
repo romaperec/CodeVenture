@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends
 from app.modules.users.dependencies import get_cached_user_service
 from app.modules.users.service import UserService
 
-
 router = APIRouter(prefix="/users", tags=["Users"])
 
 

@@ -1,7 +1,5 @@
 from fastapi import HTTPException, status
-
 from loguru import logger
-
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,7 +25,8 @@ class UserService:
 
             if existing_user is None:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User not found",
                 )
         else:
             async with async_session_factory() as temp_db:
@@ -36,7 +35,8 @@ class UserService:
 
                 if existing_user is None:
                     raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="User not found",
                     )
 
         user_schema = UserResponse.model_validate(existing_user)
@@ -72,7 +72,8 @@ class UserService:
         if existing_user is None:
             logger.warning(f"Пользователь с id: {id} не был найден в базе данных.")
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found by id"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found by id",
             )
 
         await self.db.delete(existing_user)
