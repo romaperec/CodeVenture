@@ -1,16 +1,20 @@
 import asyncio
+from datetime import timedelta
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Response, status
 from loguru import logger
 
+from app.core.config import settings
+from app.core.jwt_service import JWTService
 from app.core.security import hash_password, verify_password
-from app.modules.auth.schemas import UserLogin, UserRegister, UserResponse
+from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.users.service import UserService
 
 
 class AuthService:
-    def __init__(self, user_service: UserService):
+    def __init__(self, user_service: UserService, jwt_service: JWTService):
         self.user_service = user_service
+        self.jwt_service = jwt_service
 
     async def register_user(self, schema: UserRegister):
         existing_user = await self.user_service.get_by_email(schema.email)
@@ -24,14 +28,12 @@ class AuthService:
                 detail="Email already registered",
             )
 
-        hashed_password = await asyncio.to_thread(
-            hash_password, schema.password
-        )
+        hashed_password = await asyncio.to_thread(hash_password, schema.password)
         schema.password = hashed_password
 
         return await self.user_service.create_user(schema)
 
-    async def login_user(self, schema: UserLogin):
+    async def login_user(self, schema: UserLogin, response: Response):
         existing_user = await self.user_service.get_by_email(schema.email)
 
         if existing_user is None:
@@ -53,8 +55,23 @@ class AuthService:
                 detail="Invalid email or password",
             )
 
-        return UserResponse(
-            username=existing_user.username,
-            email=existing_user.email,
-            description=existing_user.description,
+        access_token_expire = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = await self.jwt_service.create_access_token(
+            data={"sub": existing_user.email}, expires_delta=access_token_expire
         )
+
+        refresh_token = await self.jwt_service.create_refresh_token(
+            data={"sub": existing_user.email}
+        )
+        max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=max_age,
+        )
+
+        return {"access_token": access_token, "token_type": "bearer"}

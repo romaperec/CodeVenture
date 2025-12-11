@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-from pydantic.networks import EmailStr
+from pydantic import BaseModel, EmailStr
 
 
 class Token(BaseModel):

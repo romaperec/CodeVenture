@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Request, Response
+from fastapi.security import OAuth2PasswordBearer
 
 from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.schemas import UserLogin, UserRegister
@@ -21,6 +24,13 @@ async def register_user(
 
 @router.post("/login")
 async def login_user(
-    schema: UserLogin, service: AuthService = Depends(get_auth_service)
+    response: Response,
+    schema: UserLogin,
+    service: AuthService = Depends(get_auth_service),
 ):
-    return await service.login_user(schema)
+    return await service.login_user(schema, response)
+
+
+@router.post("/refresh")
+async def refresh_access_token(request: Request):
+    pass

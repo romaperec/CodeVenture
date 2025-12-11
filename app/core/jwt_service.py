@@ -2,11 +2,14 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 
 import jwt
+from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import PyJWTError
 from loguru import logger
 
 from app.core.config import settings
 from app.core.schemas import TokenData
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 class TokenType(str, Enum):
