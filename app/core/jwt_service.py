@@ -55,7 +55,7 @@ class JWTService:
 
     async def verify_token(
         self, token: str, expected_token_type: TokenType
-    ) -> TokenData:
+    ) -> TokenData | None:
         try:
             payload = jwt.decode(
                 token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
