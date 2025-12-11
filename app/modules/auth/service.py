@@ -1,11 +1,11 @@
 import asyncio
 from datetime import timedelta
 
-from fastapi import HTTPException, Response, status
+from fastapi import HTTPException, Request, Response, status
 from loguru import logger
 
 from app.core.config import settings
-from app.core.jwt_service import JWTService
+from app.core.jwt_service import JWTService, TokenType
 from app.core.security import hash_password, verify_password
 from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.users.service import UserService
@@ -28,12 +28,14 @@ class AuthService:
                 detail="Email already registered",
             )
 
-        hashed_password = await asyncio.to_thread(hash_password, schema.password)
+        hashed_password = await asyncio.to_thread(
+            hash_password, schema.password
+        )
         schema.password = hashed_password
 
         return await self.user_service.create_user(schema)
 
-    async def login_user(self, schema: UserLogin, response: Response):
+    async def login_user(self, schema: UserLogin, response: Response) -> dict:
         existing_user = await self.user_service.get_by_email(schema.email)
 
         if existing_user is None:
@@ -55,7 +57,9 @@ class AuthService:
                 detail="Invalid email or password",
             )
 
-        access_token_expire = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expire = timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
         access_token = await self.jwt_service.create_access_token(
             data={"sub": existing_user.email}, expires_delta=access_token_expire
         )
@@ -75,3 +79,29 @@ class AuthService:
         )
 
         return {"access_token": access_token, "token_type": "bearer"}
+
+    async def update_access_token(self, request: Request) -> dict:
+        refresh_token = request.cookies.get("refresh_token")
+        if not refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token missing.",
+            )
+
+        user_data = await self.jwt_service.verify_token(
+            refresh_token, TokenType.REFRESH
+        )
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+
+        new_access_token = await self.jwt_service.create_access_token(
+            data={"sub": user_data.email}
+        )
+
+        logger.debug(
+            f"Access токен был обновлен для пользователя: {user_data.email}"
+        )
+        return {"access_token": new_access_token, "token_type": "bearer"}

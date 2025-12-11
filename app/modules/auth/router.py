@@ -31,23 +31,6 @@ async def login_user(
 
 @router.post("/refresh")
 async def refresh_access_token(
-    request: Request, jwt_service: JWTService = Depends(get_jwt_service)
+    request: Request, service: AuthService = Depends(get_auth_service)
 ):
-    refresh_token = request.cookies.get("refresh_token")
-    if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token missing.",
-        )
-
-    user_data = await jwt_service.verify_token(refresh_token, TokenType.REFRESH)
-    if not user_data:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token",
-        )
-
-    new_access_token = await jwt_service.create_access_token(
-        data={"sub": user_data.email}
-    )
-    return {"access_token": new_access_token, "token_type": "bearer"}
+    return await service.update_access_token(request)
