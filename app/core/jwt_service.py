@@ -60,13 +60,13 @@ class JWTService:
             payload = jwt.decode(
                 token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
             )
-            email: str | None = payload.get("sub")
+            id: str | None = payload.get("sub")
             token_type: str | None = payload.get("token_type")
 
-            if email is None or token_type != expected_token_type:
+            if id is None or token_type != expected_token_type:
                 return None
 
-            return TokenData(email=email)
+            return TokenData(id=id)
 
         except PyJWTError as e:
             logger.warning(f"JWT Error: {e}")

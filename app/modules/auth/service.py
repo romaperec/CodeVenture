@@ -61,11 +61,12 @@ class AuthService:
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         access_token = await self.jwt_service.create_access_token(
-            data={"sub": existing_user.email}, expires_delta=access_token_expire
+            data={"sub": str(existing_user.id)},
+            expires_delta=access_token_expire,
         )
 
         refresh_token = await self.jwt_service.create_refresh_token(
-            data={"sub": existing_user.email}
+            data={"sub": str(existing_user.id)}
         )
         max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
 
@@ -98,10 +99,10 @@ class AuthService:
             )
 
         new_access_token = await self.jwt_service.create_access_token(
-            data={"sub": user_data.email}
+            data={"sub": str(user_data.id)}
         )
 
         logger.debug(
-            f"Access токен был обновлен для пользователя: {user_data.email}"
+            f"Access токен был обновлен для пользователя: {user_data.id}"
         )
         return {"access_token": new_access_token, "token_type": "bearer"}

@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, Request, Response
 
-from app.core.jwt_service import JWTService, TokenType
-from app.modules.auth.dependencies import get_auth_service, get_jwt_service
+from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.auth.service import AuthService
 

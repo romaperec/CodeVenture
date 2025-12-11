@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class TokenData(BaseModel):
-    email: EmailStr
+    id: int
