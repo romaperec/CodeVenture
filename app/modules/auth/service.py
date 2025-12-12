@@ -33,7 +33,9 @@ class AuthService:
         )
         schema.password = hashed_password
 
-        return await self.user_service.create_user(schema)
+        await self.user_service.create_user(schema)
+
+        return {"status": "created"}
 
     async def login_user(self, schema: UserLogin, response: Response) -> dict:
         existing_user = await self.user_service.get_by_email(schema.email)
@@ -103,6 +105,6 @@ class AuthService:
         )
 
         logger.debug(
-            f"Access токен был обновлен для пользователя: {user_data.id}"
+            f"Access токен был обновлен для пользователя с id: {user_data.id}"
         )
         return {"access_token": new_access_token, "token_type": "bearer"}

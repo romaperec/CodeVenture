@@ -12,3 +12,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(index=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     password: Mapped[str]
+
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_admin: Mapped[bool] = mapped_column(default=False)

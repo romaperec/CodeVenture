@@ -12,7 +12,7 @@ async def root():
     return {"Module": "Working!"}
 
 
-@router.post("/register")
+@router.post("/register", status_code=201)
 async def register_user(
     schema: UserRegister, service: AuthService = Depends(get_auth_service)
 ):
