@@ -13,7 +13,11 @@ from app.modules.users.schemas import (
 
 
 class UserService:
-    def __init__(self, redis_client: Redis, db: AsyncSession | None = None):
+    def __init__(
+        self,
+        redis_client: Redis,
+        db: AsyncSession | None = None,
+    ):
         self.redis = redis_client
         self.db = db
 

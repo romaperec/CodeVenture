@@ -1,11 +1,11 @@
 import asyncio
 from datetime import timedelta
 
-from fastapi import HTTPException, Request, Response, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from loguru import logger
 
 from app.core.config import settings
-from app.core.jwt_service import JWTService, TokenType
+from app.core.jwt_service import JWTService, TokenType, oauth2_scheme
 from app.core.security import hash_password, verify_password
 from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.users.service import UserService
@@ -108,3 +108,15 @@ class AuthService:
             f"Access токен был обновлен для пользователя с id: {user_data.id}"
         )
         return {"access_token": new_access_token, "token_type": "bearer"}
+
+    async def get_current_user_id(
+        self,
+        token: str = Depends(oauth2_scheme),
+    ):
+        payload = await self.jwt_service.verify_token(token, TokenType.ACCESS)
+        if not payload:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+            )
+        return payload
