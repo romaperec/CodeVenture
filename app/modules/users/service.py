@@ -75,7 +75,7 @@ class UserService:
         self.db.add(new_user)
         await self.db.commit()
 
-        logger.info(f"Был создан пользователь с email: {new_user.email}.")
+        logger.debug(f"Был создан пользователь с email: {new_user.email}.")
         return new_user
 
     async def delete_user(self, id: int):
@@ -94,5 +94,5 @@ class UserService:
         await self.db.delete(existing_user)
         await self.db.commit()
 
-        logger.info(f"Пользователь с id: {id} был удален.")
+        logger.debug(f"Пользователь с id: {id} был удален.")
         return {"status": "success", "deleted_id": id}
