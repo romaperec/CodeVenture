@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.core.jwt_service import JWTService, TokenType
 from app.core.security import hash_password, verify_password
 from app.modules.auth.schemas import UserLogin, UserRegister
+from app.modules.auth.tasks import send_welcome_email
 from app.modules.users.service import UserService
 
 
@@ -28,12 +29,12 @@ class AuthService:
                 detail="Email already registered",
             )
 
-        hashed_password = await asyncio.to_thread(
-            hash_password, schema.password
-        )
+        hashed_password = await asyncio.to_thread(hash_password, schema.password)
         schema.password = hashed_password
 
         await self.user_service.create_user(schema)
+
+        await send_welcome_email.kiq(schema.email)
 
         return {"status": "created"}
 
@@ -59,9 +60,7 @@ class AuthService:
                 detail="Invalid email or password",
             )
 
-        access_token_expire = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+        access_token_expire = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = await self.jwt_service.create_access_token(
             data={"sub": str(existing_user.id)},
             expires_delta=access_token_expire,
@@ -104,7 +103,5 @@ class AuthService:
             data={"sub": str(user_data.id)}
         )
 
-        logger.debug(
-            f"Access токен был обновлен для пользователя с id: {user_data.id}"
-        )
+        logger.debug(f"Access токен был обновлен для пользователя с id: {user_data.id}")
         return {"access_token": new_access_token, "token_type": "bearer"}

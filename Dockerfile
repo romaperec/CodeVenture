@@ -10,11 +10,19 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --no-install-project
+RUN if [ ! -d ".venv" ]; then \
+        uv sync --frozen --no-install-project; \
+    else \
+        echo ".venv already exists, skipping initial sync"; \
+    fi
 
 COPY . .
 
-RUN uv sync --frozen
+RUN if [ ! -d ".venv" ]; then \
+        uv sync --frozen; \
+    else \
+        echo ".venv exists, skipping full sync"; \
+    fi
 
 ENV PATH="/app/.venv/bin:$PATH"
 
