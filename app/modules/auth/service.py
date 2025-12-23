@@ -105,3 +105,21 @@ class AuthService:
 
         logger.debug(f"Access токен был обновлен для пользователя с id: {user_data.id}")
         return {"access_token": new_access_token, "token_type": "bearer"}
+
+    async def delete_refresh_token(self, request: Request, response: Response):
+        refresh_token = request.cookies.get("refresh_token")
+        if not refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token missing.",
+            )
+
+        response.delete_cookie(
+            "refresh_token",
+            domain="localhost",
+            path="/",
+            secure=False,
+            samesite="lax",
+        )
+
+        return {"status": "success"}

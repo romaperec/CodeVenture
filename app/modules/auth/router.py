@@ -33,3 +33,12 @@ async def refresh_access_token(
     request: Request, service: AuthService = Depends(get_auth_service)
 ):
     return await service.update_access_token(request)
+
+
+@router.post("/logout")
+async def logout_user(
+    request: Request,
+    response: Response,
+    service: AuthService = Depends(get_auth_service),
+):
+    return await service.delete_refresh_token(request, response)
