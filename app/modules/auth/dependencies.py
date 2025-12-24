@@ -1,13 +1,15 @@
 from fastapi import Depends, HTTPException, status
+from redis.asyncio import Redis
 
 from app.core.jwt_service import JWTService, TokenType, oauth2_scheme
+from app.core.redis import get_redis_client
 from app.modules.auth.service import AuthService
 from app.modules.users.dependencies import get_full_user_service
 from app.modules.users.service import UserService
 
 
-def get_jwt_service() -> JWTService:
-    return JWTService()
+def get_jwt_service(redis_client: Redis = Depends(get_redis_client)) -> JWTService:
+    return JWTService(redis_client)
 
 
 def get_auth_service(

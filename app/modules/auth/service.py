@@ -82,7 +82,7 @@ class AuthService:
 
         return {"access_token": access_token, "token_type": "bearer"}
 
-    async def update_access_token(self, request: Request) -> dict:
+    async def update_access_token(self, request: Request, response: Response) -> dict:
         refresh_token = request.cookies.get("refresh_token")
         if not refresh_token:
             raise HTTPException(
@@ -99,11 +99,28 @@ class AuthService:
                 detail="Invalid refresh token",
             )
 
+        await self.jwt_service.revoke_refresh_token(refresh_token)
+
         new_access_token = await self.jwt_service.create_access_token(
             data={"sub": str(user_data.id)}
         )
+        new_refresh_token = await self.jwt_service.create_refresh_token(
+            data={"sub": str(user_data.id)}
+        )
 
-        logger.debug(f"Access токен был обновлен для пользователя с id: {user_data.id}")
+        max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+        response.set_cookie(
+            key="refresh_token",
+            value=new_refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=max_age,
+        )
+
+        logger.debug(
+            f"Все токены были успешно обновлены для пользователя с id: {user_data.id}"
+        )
         return {"access_token": new_access_token, "token_type": "bearer"}
 
     async def delete_refresh_token(self, request: Request, response: Response):
@@ -121,5 +138,7 @@ class AuthService:
             secure=False,
             samesite="lax",
         )
+
+        await self.jwt_service.revoke_refresh_token(refresh_token)
 
         return {"status": "success"}

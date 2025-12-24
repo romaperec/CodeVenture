@@ -30,9 +30,11 @@ async def login_user(
 
 @router.post("/refresh")
 async def refresh_access_token(
-    request: Request, service: AuthService = Depends(get_auth_service)
+    request: Request,
+    response: Response,
+    service: AuthService = Depends(get_auth_service),
 ):
-    return await service.update_access_token(request)
+    return await service.update_access_token(request, response)
 
 
 @router.post("/logout")

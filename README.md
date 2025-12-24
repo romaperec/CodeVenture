@@ -1,4 +1,4 @@
-# CodeVenter API *v:Develop*
+# CodeVenter API
 CodeVenter is a website for selling your projects.
 
 Developed using FastAPI.
