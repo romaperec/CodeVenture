@@ -1,7 +1,9 @@
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 
-password_hash = PasswordHash((BcryptHasher(),))
+bcrypt_hasher = BcryptHasher(rounds=10)
+
+password_hash = PasswordHash((bcrypt_hasher,))
 
 
 def hash_password(password: str) -> str:
