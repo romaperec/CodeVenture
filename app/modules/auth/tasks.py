@@ -16,7 +16,7 @@ mail_conf = ConnectionConfig(
 )
 
 
-@broker.task
+@broker.task(retry_on_error=True, max_tries=3)
 async def send_welcome_email(email: str):
     message = MessageSchema(
         subject="Добро пожаловать в CodeVenture!",
