@@ -17,7 +17,7 @@ class AuthService:
         self.user_service = user_service
         self.jwt_service = jwt_service
 
-    async def register_user(self, schema: UserRegister):
+    async def register_user(self, schema: UserRegister, response: Response):
         existing_user = await self.user_service.get_by_email(schema.email)
 
         if existing_user:
@@ -36,7 +36,27 @@ class AuthService:
 
         await send_welcome_email.kiq(schema.email)
 
-        return {"status": "created"}
+        access_token_expire = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = await self.jwt_service.create_access_token(
+            data={"sub": str(existing_user.id)},
+            expires_delta=access_token_expire,
+        )
+
+        refresh_token = await self.jwt_service.create_refresh_token(
+            data={"sub": str(existing_user.id)}
+        )
+        max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=max_age,
+        )
+
+        return {"access_token": access_token, "token_type": "bearer"}
 
     async def login_user(self, schema: UserLogin, response: Response) -> dict:
         existing_user = await self.user_service.get_by_email(schema.email)

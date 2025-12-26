@@ -16,7 +16,7 @@ async def root():
 async def register_user(
     schema: UserRegister, service: AuthService = Depends(get_auth_service)
 ):
-    return await service.register_user(schema)
+    return await service.register_user(schema, response)
 
 
 @router.post("/login")
