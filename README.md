@@ -12,12 +12,12 @@ CodeVenter - is a powerful and flexible platform for selling digital projects an
 
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColorhttps://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo)
 
-# 🐇 Quick start
+## 🐇 Quick start
 
-'''bash
+```bash
 
 docker compose up --build
-'''
+```
 
 After check:
 API: http://localhost:8000
