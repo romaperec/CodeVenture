@@ -32,18 +32,18 @@ class AuthService:
         hashed_password = await asyncio.to_thread(hash_password, schema.password)
         schema.password = hashed_password
 
-        await self.user_service.create_user(schema)
+        new_user = await self.user_service.create_user(schema)
 
         await send_welcome_email.kiq(schema.email)
 
         access_token_expire = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = await self.jwt_service.create_access_token(
-            data={"sub": str(existing_user.id)},
+            data={"sub": str(new_user.id)},
             expires_delta=access_token_expire,
         )
 
         refresh_token = await self.jwt_service.create_refresh_token(
-            data={"sub": str(existing_user.id)}
+            data={"sub": str(new_user.id)}
         )
         max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
 

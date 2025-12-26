@@ -14,7 +14,9 @@ async def root():
 
 @router.post("/register", status_code=201)
 async def register_user(
-    schema: UserRegister, service: AuthService = Depends(get_auth_service)
+    schema: UserRegister,
+    response: Response,
+    service: AuthService = Depends(get_auth_service),
 ):
     return await service.register_user(schema, response)
 
