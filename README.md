@@ -14,12 +14,14 @@ CodeVenter - is a powerful and flexible platform for selling digital projects an
 
 ## 🐇 Quick start
 
+### Insert this in cmd
+
 ```bash
 
 docker compose up --build
 ```
 
-After check:
+### After check:
 - API: http://localhost:8000
 - Swagger UI: http://localhost:8000/docs
 - Prometheus: http://localhost:9090
