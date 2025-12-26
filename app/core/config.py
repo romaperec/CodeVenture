@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str = "user@gmail.com"
     MAIL_PASSWORD: str = "password"
     MAIL_FROM: str = "user@gmail.com"
+    MAIL_FROM_NAME: str = "CodeVenter"
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_STARTTLS: bool = True
