@@ -1,4 +1,6 @@
-from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
+from pathlib import Path
+
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from loguru import logger
 
 from app.core.config import settings
@@ -14,18 +16,21 @@ mail_conf = ConnectionConfig(
     MAIL_STARTTLS=settings.MAIL_STARTTLS,
     MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
     USE_CREDENTIALS=True,
+    TEMPLATE_FOLDER=Path("app/templates"),
 )
 
 
 @broker.task(retry_on_error=True, max_tries=3)
 async def send_welcome_email(email: str):
+    template_body = {"email": email, "project_name": "CodeVenter"}
+
     message = MessageSchema(
         subject="Добро пожаловать в CodeVenture!",
         recipients=[email],
-        body="Спасибо, что присоединились к нашему сообществу! :)",
-        subtype="html",
+        template_body=template_body,
+        subtype=MessageType.html,
     )
 
     fm = FastMail(mail_conf)
-    await fm.send_message(message)
+    await fm.send_message(message, template_name="welcome.html")
     logger.info(f"Отправлено приветственное письмо на почту: {email}")
