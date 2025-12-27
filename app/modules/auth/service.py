@@ -178,8 +178,12 @@ class AuthService:
                 data={"sub": str(existing_user.id)}
             )
 
+            frontend_url = f"{settings.FRONTEND_URL}/auth/google/login/success?token={new_access_token}"
+
+            redirect_response = RedirectResponse(url=frontend_url)
+
             max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-            response.set_cookie(
+            redirect_response.set_cookie(
                 key="refresh_token",
                 value=new_refresh_token,
                 httponly=True,
@@ -187,12 +191,7 @@ class AuthService:
                 samesite="lax",
                 max_age=max_age,
             )
-
-            frontend_url = (
-                f"{settings.FRONTEND_URL}/auth/login/success?token={new_access_token}"
-            )
-
-            return RedirectResponse(url=frontend_url)
+            return redirect_response
 
         user_schema = UserLoginGoogle(username=user.display_name, email=user.email)
 
@@ -205,8 +204,12 @@ class AuthService:
             data={"sub": str(new_user.id)}
         )
 
+        frontend_url = f"{settings.FRONTEND_URL}/auth/google/login/success?token={new_access_token}"
+
+        redirect_response = RedirectResponse(url=frontend_url)
+
         max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-        response.set_cookie(
+        redirect_response.set_cookie(
             key="refresh_token",
             value=new_refresh_token,
             httponly=True,
@@ -215,8 +218,4 @@ class AuthService:
             max_age=max_age,
         )
 
-        frontend_url = (
-            f"{settings.FRONTEND_URL}/auth/login/success?token={new_access_token}"
-        )
-
-        return RedirectResponse(url=frontend_url)
+        return redirect_response
