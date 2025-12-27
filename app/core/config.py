@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    FRONTEND_URL: str = "http://localhost:8000"
+
     # JWT
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
@@ -31,6 +33,11 @@ class Settings(BaseSettings):
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
+
+    # Google
+    GOOGLE_CLIENT_ID: str = "your_client_id"
+    GOOGLE_CLIENT_SECRET: str = "your_client_secret"
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

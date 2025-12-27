@@ -2,9 +2,9 @@ from pydantic import BaseModel, ConfigDict
 
 
 class UserCreate(BaseModel):
-    username: str
+    username: str | None
     email: str
-    password: str
+    password: str | None
 
 
 class UserPublicResponse(BaseModel):

@@ -16,3 +16,8 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     description: str | None
+
+
+class UserLoginGoogle(BaseModel):
+    username: str | None
+    email: EmailStr

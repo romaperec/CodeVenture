@@ -8,10 +8,10 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(25))
+    username: Mapped[str] = mapped_column(String(25), nullable=True)
     email: Mapped[str] = mapped_column(index=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
-    password: Mapped[str]
+    password: Mapped[str] = mapped_column(nullable=True)
 
     is_active: Mapped[bool] = mapped_column(default=True)
     is_admin: Mapped[bool] = mapped_column(default=False)

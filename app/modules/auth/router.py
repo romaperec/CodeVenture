@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Response
 
+from app.core.sso import sso
 from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.auth.service import AuthService
@@ -46,3 +47,17 @@ async def logout_user(
     service: AuthService = Depends(get_auth_service),
 ):
     return await service.delete_refresh_token(request, response)
+
+
+@router.get("/google/login")
+async def login_with_google():
+    return await sso.get_login_redirect()
+
+
+@router.get("/google/callback")
+async def login_with_google_callback(
+    request: Request,
+    response: Response,
+    service: AuthService = Depends(get_auth_service),
+):
+    return await service.auth_user_with_google(request, response)
