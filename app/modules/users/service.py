@@ -48,7 +48,7 @@ class UserService:
 
         user_schema = UserPrivateResponse.model_validate(existing_user)
 
-        await self.redis.set(f"user:{id}", user_schema.model_dump_json(), ex=300)
+        await self.redis.set(f"user:{id}", user_schema.model_dump_json(), ex=1800)
 
         return user_schema
 

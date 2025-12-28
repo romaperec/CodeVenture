@@ -8,6 +8,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: codeventure
+      shared_buffers: 2GB
+      effective_cache_size: 6GB
+      work_mem: 16MB
+      maintenance_work_mem: 512MB
+      max_connections: 100
+      wal_buffers: 16MB
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -44,7 +50,7 @@ services:
       REDIS_PORT: 6379
     ports:
       - "8000:8000"
-    command: sh -c "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    command: sh -c "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --loop uvloop --http httptools --limit-concurrency 2000 --backlog 2048 --timeout-keep-alive 2"
     volumes:
       - .:/app
       - /app/.venv

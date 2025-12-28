@@ -11,19 +11,19 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 
 RUN if [ ! -d ".venv" ]; then \
-        uv sync --frozen --no-install-project; \
+    uv sync --frozen --no-install-project; \
     else \
-        echo ".venv already exists, skipping initial sync"; \
+    echo ".venv already exists, skipping initial sync"; \
     fi
 
 COPY . .
 
 RUN if [ ! -d ".venv" ]; then \
-        uv sync --frozen; \
+    uv sync --frozen; \
     else \
-        echo ".venv exists, skipping full sync"; \
+    echo ".venv exists, skipping full sync"; \
     fi
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--loop", "uvloop", "--http", "httptools", "--limit-concurrency", "2000", "--backlog", "2048", "--timeout-keep-alive", "2", "--access-log"]
