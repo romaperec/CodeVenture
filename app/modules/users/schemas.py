@@ -10,12 +10,18 @@ class UserCreate(BaseModel):
 class UserPublicResponse(BaseModel):
     id: int
     username: str | None
+    description: str
+    is_seller: bool
+    is_admin: bool
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class UserPrivateResponse(UserPublicResponse):
+    id: int
+    username: str | None
     email: str
     description: str | None
     is_active: bool
+    is_seller: bool
     is_admin: bool

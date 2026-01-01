@@ -14,4 +14,5 @@ class User(Base):
     password: Mapped[str] = mapped_column(nullable=True)
 
     is_active: Mapped[bool] = mapped_column(default=True)
+    is_seller: Mapped[bool] = mapped_column(default=False)
     is_admin: Mapped[bool] = mapped_column(default=False)

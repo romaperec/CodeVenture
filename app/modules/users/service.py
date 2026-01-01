@@ -94,3 +94,32 @@ class UserService:
 
         logger.debug(f"Пользователь с id: {id} был удален.")
         return {"status": "success", "deleted_id": id}
+
+    async def _invalidate_user_cache(self, id: int):
+        await self.redis.delete(f"user:{id}")
+        logger.debug(f"Кэш пользователя {id} инвалидирован.")
+
+    async def become_seller(self, id: int):
+        existing_user = await self.db.execute(select(User).where(User.id == id))
+        existing_user = existing_user.scalar_one_or_none()
+
+        if existing_user is None:
+            logger.warning(f"Пользователь с id: {id} не был найден в базе данных.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found by id",
+            )
+
+        if existing_user.is_seller == True:  # noqa: E712
+            raise HTTPException(
+                status_code=status.HTTP_204_NO_CONTENT, detail="User already seller"
+            )
+
+        existing_user.is_seller = True
+
+        await self.db.commit()
+        await self.db.refresh(existing_user)
+
+        await self._invalidate_user_cache(id)
+
+        return {"status": "success", "seller_id": id}
