@@ -35,6 +35,24 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:latest
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   app:
     build: .
     env_file:
@@ -48,6 +66,10 @@ services:
       DB_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/codeventure
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_SECURE: "false"
     ports:
       - "8000:8000"
     command: sh -c "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --loop uvloop --http httptools --limit-concurrency 2000 --backlog 2048 --timeout-keep-alive 2"
@@ -100,3 +122,4 @@ volumes:
   redis_data:
   prometheus_data:
   grafana_data:
+  minio_data:

@@ -24,6 +24,15 @@ class Settings(BaseSettings):
     REDIS_DB_CACHE: int = 0
     REDIS_DB_QUEUE: int = 1
 
+    @cached_property
+    def REDIS_URL_QUEUE(self) -> str:
+        if not self.REDIS_PASSWORD:
+            return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB_QUEUE}"
+        return (
+            f"redis://:{self.REDIS_PASSWORD}@"
+            f"{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB_QUEUE}"
+        )
+
     # Mail
     MAIL_USERNAME: str = "user@gmail.com"
     MAIL_PASSWORD: str = "password"
@@ -39,16 +48,14 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = "your_client_secret"
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    # MiniO
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_BUCKET_BRODUCTS: str = "products-files"
+    MINIO_SECURE: bool = False
 
-    @cached_property
-    def REDIS_URL_QUEUE(self) -> str:
-        if not self.REDIS_PASSWORD:
-            return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB_QUEUE}"
-        return (
-            f"redis://:{self.REDIS_PASSWORD}@"
-            f"{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB_QUEUE}"
-        )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()

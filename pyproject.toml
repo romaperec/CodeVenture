@@ -11,6 +11,7 @@ dependencies = [
     "fastapi-mail>=1.6.1",
     "fastapi-sso>=0.19.0",
     "loguru>=0.7.3",
+    "minio>=7.2.20",
     "prometheus-fastapi-instrumentator>=7.1.0",
     "pwdlib[bcrypt]>=0.3.0",
     "pydantic-settings>=2.12.0",
