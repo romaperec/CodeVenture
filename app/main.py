@@ -23,6 +23,9 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(users_router)
 
+from app.modules.products.models import Product  # noqa: E402, F401
+from app.modules.users.models import User  # noqa: E402, F401
+
 instrumentator = Instrumentator()
 instrumentator.instrument(app)
 instrumentator.expose(app)

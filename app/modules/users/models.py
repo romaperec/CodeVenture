@@ -1,4 +1,6 @@
-from sqlalchemy import String, Text
+from datetime import datetime
+
+from sqlalchemy import DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db_helper import Base
@@ -18,5 +20,7 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
     is_seller: Mapped[bool] = mapped_column(default=False)
     is_admin: Mapped[bool] = mapped_column(default=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
 
     products: Mapped[list["Product"]] = relationship(back_populates="seller")  # noqa: F821

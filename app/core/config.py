@@ -52,8 +52,9 @@ class Settings(BaseSettings):
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET_BRODUCTS: str = "products-files"
+    MINIO_BUCKET_PRODUCTS: str = "products-files"
     MINIO_SECURE: bool = False
+    MINIO_MAX_FILE_SIZE_MB: int = 500
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

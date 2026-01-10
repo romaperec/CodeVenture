@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -13,6 +15,7 @@ class UserPublicResponse(BaseModel):
     description: str
     is_seller: bool
     is_admin: bool
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -25,3 +28,4 @@ class UserPrivateResponse(UserPublicResponse):
     is_active: bool
     is_seller: bool
     is_admin: bool
+    created_at: datetime
