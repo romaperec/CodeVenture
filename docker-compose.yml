@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16
-    restart: always
+    restart: unless-stopped
     ports:
       - "5435:5432"
     environment:
@@ -24,7 +24,7 @@ services:
 
   redis:
     image: redis:8
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
@@ -37,7 +37,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -55,6 +55,7 @@ services:
 
   app:
     build: .
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -78,6 +79,7 @@ services:
       - /app/.venv
 
   worker:
+    restart: unless-stopped
     build: .
     env_file:
       - .env
@@ -96,6 +98,7 @@ services:
       - /app/.venv
 
   prometheus:
+    restart: unless-stopped
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
@@ -109,6 +112,7 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles"
 
   grafana:
+    restart: unless-stopped
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
