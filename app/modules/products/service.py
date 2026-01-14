@@ -5,6 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.products.models import Product
+from app.modules.products.schemas import ProductCreate
+from app.modules.users.models import User
 
 
 class ProductService:
@@ -33,3 +35,14 @@ class ProductService:
             )
 
         return product
+
+    async def create_product(self, user_id: int, schema: ProductCreate):
+        new_product = Product(
+            title=schema.title, description=schema.description, user_id=user_id
+        )
+
+        self.db.add(new_product)
+        await self.db.commit()
+        await self.db.refresh(new_product)
+
+        return new_product
