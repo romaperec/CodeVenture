@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
 
 from app.core.rate_limit import limiter
-from app.core.sso import sso
+from app.core.sso import google_sso, github_sso
 from app.modules.auth.dependencies import get_auth_service
 from app.modules.auth.schemas import UserLogin, UserRegister
 from app.modules.auth.service import AuthService
@@ -57,7 +57,7 @@ async def logout_user(
 
 @router.get("/google/login")
 async def login_with_google():
-    return await sso.get_login_redirect()
+    return await google_sso.get_login_redirect()
 
 
 @router.get("/google/callback")
@@ -66,4 +66,18 @@ async def login_with_google_callback(
     response: Response,
     service: AuthService = Depends(get_auth_service),
 ):
-    return await service.auth_user_with_google(request, response)
+    return await service.auth_user_with_oauth2(request, response, "Google")
+
+
+@router.get("/github/login")
+async def login_with_github():
+    return await github_sso.get_login_redirect()
+
+
+@router.get("/github/callback")
+async def login_with_github_callback(
+    request: Request,
+    response: Response,
+    service: AuthService = Depends(get_auth_service),
+):
+    return await service.auth_user_with_oauth2(request, response, "Github")

@@ -18,6 +18,6 @@ class UserResponse(BaseModel):
     description: str | None
 
 
-class UserLoginGoogle(BaseModel):
+class UserLoginOAuth2(BaseModel):
     username: str | None
     email: EmailStr

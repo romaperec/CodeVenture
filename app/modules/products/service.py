@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.products.models import Product
 from app.modules.products.schemas import ProductCreate
-from app.modules.users.models import User
 
 
 class ProductService:

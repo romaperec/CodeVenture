@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = "your_client_secret"
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
 
+    # GitHub
+    GITHUB_CLIENT_ID: str = "your_client_id"
+    GITHUB_CLIENT_SECRET: str = "your_client_secret"
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/auth/github/callback"
+
     # MiniO
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"

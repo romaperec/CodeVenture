@@ -8,8 +8,12 @@ from loguru import logger
 from app.core.config import settings
 from app.core.jwt_service import JWTService, TokenType
 from app.core.security import hash_password, verify_password
-from app.core.sso import sso
-from app.modules.auth.schemas import UserLogin, UserLoginGoogle, UserRegister
+from app.core.sso import google_sso, github_sso
+from app.modules.auth.schemas import (
+    UserLogin,
+    UserLoginOAuth2,
+    UserRegister,
+)
 from app.modules.auth.tasks import send_welcome_email
 from app.modules.users.service import UserService
 
@@ -165,8 +169,15 @@ class AuthService:
 
         return {"status": "success"}
 
-    async def auth_user_with_google(self, request: Request, response: Response):
-        user = await sso.verify_and_process(request)
+    async def auth_user_with_oauth2(
+        self, request: Request, response: Response, method: str
+    ):
+        if method == "Google":
+            user = await google_sso.verify_and_process(request)
+        elif method == "Github":
+            user = await github_sso.verify_and_process(request)
+        else:
+            logger.error("Unknown method for oauth2.0 authorization")
 
         existing_user = await self.user_service.get_by_email(user.email)
 
@@ -178,33 +189,21 @@ class AuthService:
                 data={"sub": str(existing_user.id)}
             )
 
-            frontend_url = f"{settings.FRONTEND_URL}/auth/google/login/success?token={new_access_token}"
+        else:
+            user_schema = UserLoginOAuth2(username=user.display_name, email=user.email)
+            new_user = await self.user_service.create_user(user_schema)
 
-            redirect_response = RedirectResponse(url=frontend_url)
-
-            max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-            redirect_response.set_cookie(
-                key="refresh_token",
-                value=new_refresh_token,
-                httponly=True,
-                secure=True,
-                samesite="lax",
-                max_age=max_age,
+            new_access_token = await self.jwt_service.create_access_token(
+                data={"sub": str(new_user.id)}
             )
-            return redirect_response
+            new_refresh_token = await self.jwt_service.create_refresh_token(
+                data={"sub": str(new_user.id)}
+            )
 
-        user_schema = UserLoginGoogle(username=user.display_name, email=user.email)
-
-        new_user = await self.user_service.create_user(user_schema)
-
-        new_access_token = await self.jwt_service.create_access_token(
-            data={"sub": str(new_user.id)}
-        )
-        new_refresh_token = await self.jwt_service.create_refresh_token(
-            data={"sub": str(new_user.id)}
-        )
-
-        frontend_url = f"{settings.FRONTEND_URL}/auth/google/login/success?token={new_access_token}"
+        if method == "Google":
+            frontend_url = f"{settings.FRONTEND_URL}/auth/google/login/success?token={new_access_token}"
+        elif method == "Github":
+            frontend_url = f"{settings.FRONTEND_URL}/auth/github/login/success?token={new_access_token}"
 
         redirect_response = RedirectResponse(url=frontend_url)
 
