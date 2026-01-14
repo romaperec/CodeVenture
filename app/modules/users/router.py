@@ -12,7 +12,7 @@ from app.modules.users.service import UserService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.get("/")
+@router.get("/healthy")
 async def root():
     return {"Module": "Working!"}
 

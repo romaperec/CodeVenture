@@ -9,7 +9,7 @@ from app.modules.auth.service import AuthService
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.get("/")
+@router.get("/healthy")
 async def root():
     return {"Module": "Working!"}
 

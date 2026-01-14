@@ -9,6 +9,11 @@ from app.modules.products.service import ProductService
 router = APIRouter(prefix="/products", tags=["Products"])
 
 
+@router.get("/healthy")
+async def root():
+    return {"Module": "Working!"}
+
+
 @router.post("/create")
 async def create_product(
     product: ProductCreate,
