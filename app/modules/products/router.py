@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends
 
 from app.modules.auth.dependencies import get_current_user_id
-from app.modules.products.dependencies import get_full_product_service
+from app.modules.products.dependencies import (
+    get_cached_product_service,
+    get_full_product_service,
+)
 from app.modules.products.schemas import ProductCreate
 from app.modules.products.service import ProductService
 
@@ -32,6 +35,6 @@ async def get_all_products(service: ProductService = Depends(get_full_product_se
 
 @router.get("/{id}")
 async def get_product(
-    id: int, service: ProductService = Depends(get_full_product_service)
+    id: int, service: ProductService = Depends(get_cached_product_service)
 ):
     return await service.get_product_by_id(id)

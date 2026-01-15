@@ -4,8 +4,9 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.db_helper import sessionmaker as async_session_factory
 from app.modules.products.models import Product
-from app.modules.products.schemas import ProductCreate
+from app.modules.products.schemas import ProductCreate, ProductPrivateResponse
 
 
 class ProductService:
@@ -25,15 +26,34 @@ class ProductService:
         return products
 
     async def get_product_by_id(self, id: int):
-        product = await self.db.execute(select(Product).where(Product.id == id))
-        product = product.scalar_one_or_none()
+        cached_book = await self.redis.get(f"book:{id}")
+        if cached_book:
+            return ProductPrivateResponse.model_validate_json(cached_book)
 
-        if product is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
-            )
+        if self.db:
+            product = await self.db.execute(select(Product).where(Product.id == id))
+            product = product.scalar_one_or_none()
 
-        return product
+            if product is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+                )
+        else:
+            async with async_session_factory() as temp_db:
+                product = await temp_db.execute(select(Product).where(Product.id == id))
+                product = product.scalar_one_or_none()
+
+                if product is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Product not found",
+                    )
+
+        book_schema = ProductPrivateResponse.model_validate(product)
+
+        await self.redis.set(f"book:{id}", book_schema.model_dump_json(), ex=1800)
+
+        return book_schema
 
     async def create_product(self, user_id: int, schema: ProductCreate):
         new_product = Product(
