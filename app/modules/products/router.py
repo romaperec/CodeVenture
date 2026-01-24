@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from app.modules.auth.dependencies import get_current_user_id
 from app.modules.products.dependencies import (
@@ -7,6 +7,7 @@ from app.modules.products.dependencies import (
 )
 from app.modules.products.schemas import ProductCreate
 from app.modules.products.service import ProductService
+from app.core.rate_limit import limiter
 
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -18,13 +19,13 @@ async def root():
 
 
 @router.post("/create")
+@limiter.limit("2/minute")
 async def create_product(
+    request: Request,
     product: ProductCreate,
     user_id: int = Depends(get_current_user_id),
-    # user_service: UserService = Depends(get_cached_user_service),
     service: ProductService = Depends(get_full_product_service),
 ):
-    # user = await user_service.get_by_id(user_id)
     return await service.create_product(user_id, product)
 
 

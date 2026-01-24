@@ -76,6 +76,15 @@ class AuthService:
                 detail="Invalid email or password",
             )
 
+        if existing_user.password is None:
+            logger.warning(
+                f"Неудачная попытка входа. У пользователя с email: {schema.email} нет пароля."
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
+
         correct_password = await asyncio.to_thread(
             verify_password, schema.password, existing_user.password
         )
