@@ -1,31 +1,101 @@
-# 🚀 CodeVenterAPI
+# 🚀 CodeVenture
 
-CodeVenter - is a powerful and flexible platform for selling digital projects and source code. It's an API service built on modern asynchronous technologies, ensuring high performance and scalability.
+> A platform for selling digital projects and source code
 
-## ⚙️ Technology Stack
+**CodeVenture** is a powerful platform for developers to monetize their projects and source code. Built with modern asynchronous technologies for high performance and scalability.
 
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo)
+---
 
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logohttps://img.shields.io/badge/Taskiq-111827?style=for-the-badge&logo)
+## 🛠️ Tech Stack
 
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo)
+- **FastAPI** — High-performance web framework
+- **PostgreSQL** — Relational database
+- **Redis** — Caching & sessions
+- **Docker** — Containerization
+- **Prometheus & Grafana** — Monitoring
+- **MinIO** — Object storage
+- **Taskiq** — Task queue
 
-![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColorhttps://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo)
+---
 
-## 🐇 Quick start
+## ✨ Features
 
-### Insert this in cmd
+- 🔐 JWT authentication & SSO
+- 👥 User management with roles
+- 🛍️ Product catalog
+- 📦 Secure file storage
+- ⚡ Async task processing
+- 📊 Monitoring & metrics
+- 🛡️ Rate limiting & security
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- Python 3.13+ (optional)
+
+### Running
 
 ```bash
-
 docker compose up --build
 ```
 
-### After check:
-- API: http://localhost:8000
-- Swagger UI: http://localhost:8000/docs
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000
+### Access Services
 
+- **API**: http://localhost:8000
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000
 
-## Made with 💘 by romaperec
+---
+
+## 📁 Project Structure
+
+```
+codeventure/
+├── app/
+│   ├── core/          # Config, DB, utils
+│   ├── modules/       # Auth, users, products
+│   └── templates/     # HTML
+├── migrations/        # DB migrations
+├── tests/             # Tests
+├── docker-compose.yml
+└── pyproject.toml
+```
+
+---
+
+## 🔧 Development
+
+```bash
+# Install dependencies
+uv install
+uv install --group dev
+
+# Run tests
+pytest
+
+# Format code
+ruff format .
+ruff check . --fix
+```
+
+---
+
+## 📚 API Docs
+
+- **Swagger**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+---
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE)
+
+---
+
+Made with ❤️ by [romaperec](https://github.com/romaperec)
