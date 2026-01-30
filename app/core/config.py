@@ -58,8 +58,24 @@ class Settings(BaseSettings):
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_BUCKET_PRODUCTS: str = "products-files"
+    MINIO_BUCKET_IMAGES: str = "products-images"
     MINIO_SECURE: bool = False
     MINIO_MAX_FILE_SIZE_MB: int = 500
+    MINIO_MAX_IMAGE_SIZE_MB: int = 10
+    MAX_IMAGES_PER_PRODUCT: int = 10
+
+    ALLOWED_PRODUCT_EXTENSIONS: set[str] = {
+        ".zip",
+        ".rar",
+        ".7z",
+        ".tar",
+        ".gz",
+        ".pdf",
+        ".py",
+        ".js",
+        ".ts",
+    }
+    ALLOWED_IMAGES_EXTENSIONS = set[str] = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

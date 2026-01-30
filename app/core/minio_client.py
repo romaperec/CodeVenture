@@ -1,10 +1,13 @@
 import asyncio
 from datetime import timedelta
 from io import BytesIO
+from pathlib import Path
+import uuid
 
 from loguru import logger
 from minio import Minio
 from minio.error import S3Error
+
 
 from app.core.config import settings
 
@@ -17,73 +20,113 @@ class MinIOClient:
             secret_key=settings.MINIO_SECRET_KEY,
             secure=settings.MINIO_SECURE,
         )
-        self.bucket = settings.MINIO_BUCKET_PRODUCTS
         self._ensure_bucket_exists()
 
     def _ensure_bucket_exists(self):
+        buckets = [settings.MINIO_BUCKET_PRODUCTS, settings.MINIO_BUCKET_IMAGES]
         try:
-            if not self.client.bucket_exists(self.bucket):
-                self.client.make_bucket(self.bucket)
-                logger.info(f"Created bucket: {self.bucket}")
+            for bucket in buckets:
+                if not self.client.bucket_exists(bucket):
+                    self.client.make_bucket(bucket)
+                    logger.info(f"Created bucket: {bucket}")
         except S3Error as e:
             logger.error(f"MinIO error: {e}")
             raise
 
     async def upload_file(
         self,
-        object_name: str,
+        bucket: str,
         file_data: BytesIO,
         file_size: int,
+        original_filename: str,
         content_type: str = "application/octet-stream",
+        folder: str | None = None,
     ) -> str:
+        ext = Path(original_filename).suffix.lower()
+        unique_name = f"{uuid.uuid4().hex}{ext}"
+
+        if folder:
+            object_name = f"{folder}/{unique_name}"
+        else:
+            object_name = unique_name
+
         try:
             await asyncio.to_thread(
                 self.client.put_object,
-                bucket_name=self.bucket,
+                bucket_name=bucket,
+                object_name=object_name,
                 data=file_data,
                 length=file_size,
                 content_type=content_type,
             )
-            logger.info(f"Uploaded file: {object_name}")
+            logger.info(f"Uploaded file: {object_name} to bucket: {bucket}")
             return object_name
         except S3Error as e:
-            logger.error(f"MinIO error: {e}")
+            logger.error(f"MinIO upload error: {e}")
             raise
 
-    async def delete_file(self, object_name: str):
+    async def delete_file(self, bucket: str, object_name: str):
         try:
-            await asyncio.to_thread(self.client.remove_object, self.bucket, object_name)
-            logger.info(f"Deleted file: {object_name}")
+            await asyncio.to_thread(self.client.remove_object, bucket, object_name)
+            logger.info(f"Deleted file: {object_name} from bucket {bucket}")
+            return True
         except S3Error as e:
-            logger.error(f"MinIO error: {e}")
+            logger.error(f"MinIO delete error: {e}")
             raise
 
-    async def generate_presigned_url(self, object_name: str, expires: int = 300) -> str:
+    async def delete_files(self, bucket: str, object_names: list[str]) -> None:
+        from minio.deleteobjects import DeleteObject
+
+        try:
+            delete_objects = [DeleteObject(name) for name in object_names]
+            errors = await asyncio.to_thread(
+                lambda: list(self.client.remove_object(bucket, delete_objects))
+            )
+            for error in errors:
+                logger.error(f"Error deleting {error.name}: {error.message}")
+        except S3Error as e:
+            logger.error(f"MinIO bulk delete error: {e}")
+
+    async def generate_presigned_url(
+        self, bucket: str, object_name: str, expires_seconds: int = 3600
+    ) -> str:
         try:
             url = await asyncio.to_thread(
                 self.client.presigned_get_object,
-                bucket_name=self.bucket,
+                bucket_name=bucket,
                 object_name=object_name,
-                expires=timedelta(seconds=expires),
+                expires=timedelta(seconds=expires_seconds),
             )
             return url
         except S3Error as e:
             logger.error(f"URL generation error {e}")
             raise
 
-    async def get_file_info(self, object_name) -> str:
+    async def generate_public_url(self, bucket: str, object_name: str) -> str:
+        if settings.MINIO_SECURE:
+            protocol = "https"
+        else:
+            protocol = "http"
+        return f"{protocol}://{settings.MINIO_ENDPOINT}/{bucket}/{object_name}"
+
+    async def get_file_info(self, bucket: str, object_name: str) -> dict | None:
         try:
-            stat = await asyncio.to_thread(
-                self.client.stat_object, self.bucket, object_name
-            )
+            stat = await asyncio.to_thread(self.client.stat_object, bucket, object_name)
             return {
                 "size": stat.size,
                 "last_modified": stat.last_modified,
                 "content_type": stat.content_type,
+                "etag": stat.etag,
             }
         except S3Error as e:
+            if e.code == "NoSuchKey":
+                return None
             logger.error(f"File info error {e}")
             raise
+
+    async def file_exists(self, bucket: str, object_name: str) -> bool:
+        info = await self.get_file_info(bucket, object_name)
+        return info is not None
 
 
 minio_client = MinIOClient()
