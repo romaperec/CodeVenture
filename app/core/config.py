@@ -75,7 +75,7 @@ class Settings(BaseSettings):
         ".js",
         ".ts",
     }
-    ALLOWED_IMAGES_EXTENSIONS = set[str] = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+    ALLOWED_IMAGES_EXTENSIONS: set[str] = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
