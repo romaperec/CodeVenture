@@ -9,6 +9,7 @@ from app.modules.users.service import UserService
 
 
 def get_jwt_service(redis_client: Redis = Depends(get_redis_client)) -> JWTService:
+    """Возвращает экземпляр JWTService."""
     return JWTService(redis_client)
 
 
@@ -16,6 +17,7 @@ def get_auth_service(
     jwt_service: JWTService = Depends(get_jwt_service),
     user_service: UserService = Depends(get_full_user_service),
 ) -> AuthService:
+    """Возвращает экземпляр AuthService."""
     return AuthService(user_service, jwt_service)
 
 
@@ -23,6 +25,7 @@ async def get_current_user_id(
     token: str = Depends(oauth2_scheme),
     jwt_service: JWTService = Depends(get_jwt_service),
 ):
+    """Извлекает ID текущего пользователя из JWT токена."""
     payload = await jwt_service.verify_token(token, TokenType.ACCESS)
     if not payload:
         raise HTTPException(

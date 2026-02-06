@@ -1,3 +1,6 @@
+# app/main.py
+"""Главный файл приложения FastAPI CodeVenture."""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -10,6 +13,10 @@ from app.modules.auth.router import router as auth_router
 from app.modules.users.router import router as users_router
 from app.modules.products.router import router as products_router
 
+# ═══════════════════════════════════════════════════════════════
+# APPLICATION CONFIGURATION
+# ═══════════════════════════════════════════════════════════════
+
 app = FastAPI(title="CodeVenture API", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
@@ -21,6 +28,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ═══════════════════════════════════════════════════════════════
+# ROUTERS
+# ═══════════════════════════════════════════════════════════════
+
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(products_router)
@@ -29,11 +40,21 @@ app.include_router(products_router)
 from app.modules.products.models import Product  # noqa: E402, F401
 from app.modules.users.models import User  # noqa: E402, F401
 
+# ═══════════════════════════════════════════════════════════════
+# MONITORING
+# ═══════════════════════════════════════════════════════════════
+
 instrumentator = Instrumentator()
 instrumentator.instrument(app)
 instrumentator.expose(app)
 
 
+# ═══════════════════════════════════════════════════════════════
+# HEALTH CHECK
+# ═══════════════════════════════════════════════════════════════
+
+
 @app.get("/")
 async def root():
+    """Проверка здоровья приложения."""
     return {"API": "Working!"}

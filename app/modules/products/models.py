@@ -1,3 +1,5 @@
+"""Модели товаров для ORM SQLAlchemy."""
+
 import datetime
 from sqlalchemy import BigInteger, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,6 +8,8 @@ from app.core.db_helper import Base
 
 
 class Product(Base):
+    """Модель товара."""
+
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -35,6 +39,8 @@ class Product(Base):
 
 
 class ProductImage(Base):
+    """Модель изображения товара."""
+
     __tablename__ = "product_images"
 
     id: Mapped[int] = mapped_column(primary_key=True)

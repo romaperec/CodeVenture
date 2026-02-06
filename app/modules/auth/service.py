@@ -19,11 +19,21 @@ from app.modules.users.service import UserService
 
 
 class AuthService:
+    """Сервис аутентификации и авторизации пользователей."""
+
     def __init__(self, user_service: UserService, jwt_service: JWTService):
+        """
+        Инициализирует сервис аутентификации.
+
+        Args:
+            user_service: Сервис управления пользователями.
+            jwt_service: Сервис управления JWT токенами.
+        """
         self.user_service = user_service
         self.jwt_service = jwt_service
 
     async def register_user(self, schema: UserRegister, response: Response):
+        """Регистрирует нового пользователя и создает токены доступа."""
         existing_user = await self.user_service.get_by_email(schema.email)
 
         if existing_user:
@@ -65,6 +75,7 @@ class AuthService:
         return {"access_token": access_token, "token_type": "bearer"}
 
     async def login_user(self, schema: UserLogin, response: Response) -> dict:
+        """Авторизирует пользователя и создает токены доступа."""
         existing_user = await self.user_service.get_by_email(schema.email)
 
         if existing_user is None:
@@ -118,6 +129,7 @@ class AuthService:
         return {"access_token": access_token, "token_type": "bearer"}
 
     async def update_access_token(self, request: Request, response: Response) -> dict:
+        """Обновляет access token используя refresh token."""
         refresh_token = request.cookies.get("refresh_token")
         if not refresh_token:
             raise HTTPException(
@@ -159,6 +171,7 @@ class AuthService:
         return {"access_token": new_access_token, "token_type": "bearer"}
 
     async def delete_refresh_token(self, request: Request, response: Response):
+        """Удаляет refresh token и выполняет выход пользователя."""
         refresh_token = request.cookies.get("refresh_token")
         if not refresh_token:
             raise HTTPException(
@@ -181,6 +194,7 @@ class AuthService:
     async def auth_user_with_oauth2(
         self, request: Request, response: Response, method: str
     ):
+        """Авторизирует пользователя через OAuth2 (Google или Github)."""
         if method == "Google":
             user = await google_sso.verify_and_process(request)
         elif method == "Github":

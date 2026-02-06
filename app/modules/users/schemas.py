@@ -4,12 +4,16 @@ from pydantic import BaseModel, ConfigDict
 
 
 class UserCreate(BaseModel):
+    """Схема для создания нового пользователя."""
+
     username: str | None
     email: str
     password: str | None
 
 
 class UserPublicResponse(BaseModel):
+    """Схема публичного ответа с информацией о пользователе."""
+
     id: int
     username: str | None
     description: str
@@ -21,6 +25,8 @@ class UserPublicResponse(BaseModel):
 
 
 class UserPrivateResponse(UserPublicResponse):
+    """Схема приватного ответа с полной информацией о пользователе."""
+
     id: int
     username: str | None
     email: str

@@ -1,3 +1,6 @@
+# app/core/db_helper.py
+"""Помощник для управления подключением к базе данных."""
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -22,8 +25,11 @@ sessionmaker = async_sessionmaker(
 
 
 async def get_session():
+    """Возвращает асинхронную сессию для работы с БД."""
     async with sessionmaker() as session:
         yield session
 
 
-class Base(DeclarativeBase): ...
+class Base(DeclarativeBase):
+    """Базовый класс для всех ORM моделей."""
+    ...

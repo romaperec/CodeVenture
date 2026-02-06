@@ -1,3 +1,6 @@
+# app/core/jwt_service.py
+"""Сервис управления JWT токенами."""
+
 import uuid
 from datetime import UTC, datetime, timedelta
 from enum import Enum
@@ -15,17 +18,28 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 class TokenType(str, Enum):
+    """Типы JWT токенов."""
+
     ACCESS = "access"
     REFRESH = "refresh"
 
 
 class JWTService:
+    """Сервис для создания, проверки и управления JWT токенами."""
+
     def __init__(self, redis_client: Redis) -> None:
+        """
+        Инициализирует JWTService.
+
+        Args:
+            redis_client: Клиент Redis для управления refresh токенами.
+        """
         self.redis = redis_client
 
     async def create_access_token(
         self, data: dict, expires_delta: timedelta | None = None
     ) -> str:
+        """Создает access JWT токен."""
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now(UTC).replace(tzinfo=None) + expires_delta
@@ -42,6 +56,7 @@ class JWTService:
     async def create_refresh_token(
         self, data: dict, expires_delta: timedelta | None = None
     ) -> str:
+        """Создает refresh JWT токен и сохраняет его в Redis."""
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now(UTC).replace(tzinfo=None) + expires_delta
@@ -74,6 +89,7 @@ class JWTService:
     async def verify_token(
         self, token: str, expected_token_type: TokenType
     ) -> TokenData | None:
+        """Проверяет валидность и тип JWT токена."""
         try:
             payload = jwt.decode(
                 token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -104,6 +120,7 @@ class JWTService:
             return None
 
     async def revoke_refresh_token(self, token: str):
+        """Отзывает refresh токен, удаляя его из Redis."""
         if not self.redis:
             logger.warning("Redis не подключен к jwt_service!")
             return

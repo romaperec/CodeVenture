@@ -1,3 +1,6 @@
+# app/modules/auth/tasks.py
+"""Задачи (tasks) для модуля аутентификации."""
+
 from pathlib import Path
 
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
@@ -5,6 +8,10 @@ from loguru import logger
 
 from app.core.config import settings
 from app.core.taskiq import broker
+
+# ═══════════════════════════════════════════════════════════════
+# EMAIL CONFIGURATION
+# ═══════════════════════════════════════════════════════════════
 
 mail_conf = ConnectionConfig(
     MAIL_USERNAME=settings.MAIL_USERNAME,
@@ -20,8 +27,14 @@ mail_conf = ConnectionConfig(
 )
 
 
+# ═══════════════════════════════════════════════════════════════
+# EMAIL TASKS
+# ═══════════════════════════════════════════════════════════════
+
+
 @broker.task(retry_on_error=True, max_tries=3)
 async def send_welcome_email(email: str):
+    """Отправляет приветственное письмо новому пользователю."""
     template_body = {"email": email, "project_name": "CodeVenter"}
 
     message = MessageSchema(

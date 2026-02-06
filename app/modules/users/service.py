@@ -13,15 +13,25 @@ from app.modules.users.schemas import (
 
 
 class UserService:
+    """Сервис управления пользователями."""
+
     def __init__(
         self,
         redis_client: Redis,
         db: AsyncSession | None = None,
     ):
+        """
+        Инициализирует сервис управления пользователями.
+
+        Args:
+            redis_client: Клиент Redis для кэширования.
+            db: Сессия базы данных (опционально).
+        """
         self.redis = redis_client
         self.db = db
 
     async def get_by_id(self, id: int):
+        """Получает пользователя по ID с кэшированием."""
         cached_user = await self.redis.get(f"user:{id}")
         if cached_user:
             return UserPrivateResponse.model_validate_json(cached_user)
@@ -53,12 +63,14 @@ class UserService:
         return user_schema
 
     async def get_by_email(self, email: str):
+        """Получает пользователя по email."""
         existing_user = await self.db.execute(select(User).where(User.email == email))
         existing_user = existing_user.scalar_one_or_none()
 
         return existing_user
 
     async def create_user(self, schema: UserCreate):
+        """Создает нового пользователя."""
         password = getattr(schema, "password", None)
         if password:
             new_user = User(
@@ -79,6 +91,7 @@ class UserService:
         return new_user
 
     async def delete_user(self, id: int):
+        """Удаляет пользователя по ID."""
         existing_user = await self.db.execute(select(User).where(User.id == id))
         existing_user = existing_user.scalar_one_or_none()
 
@@ -96,10 +109,12 @@ class UserService:
         return {"status": "success", "deleted_id": id}
 
     async def _invalidate_user_cache(self, id: int):
+        """Инвалидирует кэш пользователя."""
         await self.redis.delete(f"user:{id}")
         logger.debug(f"Кэш пользователя {id} инвалидирован.")
 
     async def become_seller(self, id: int):
+        """Делает пользователя продавцом."""
         existing_user = await self.db.execute(select(User).where(User.id == id))
         existing_user = existing_user.scalar_one_or_none()
 

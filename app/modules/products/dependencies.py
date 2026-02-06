@@ -11,10 +11,12 @@ def get_full_product_service(
     redis: Redis = Depends(get_redis_client),
     db: AsyncSession = Depends(get_session),
 ) -> ProductService:
+    """Возвращает экземпляр ProductService с доступом к БД."""
     return ProductService(redis=redis, db=db)
 
 
 def get_cached_product_service(
     redis: Redis = Depends(get_redis_client),
 ) -> ProductService:
+    """Возвращает экземпляр ProductService только с Redis кэшем."""
     return ProductService(redis=redis)

@@ -14,6 +14,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/healthy")
 async def root():
+    """Проверка здоровья модуля пользователей."""
     return {"Module": "Working!"}
 
 
@@ -24,6 +25,7 @@ async def get_me(
     user_id: int = Depends(get_current_user_id),
     service: UserService = Depends(get_cached_user_service),
 ):
+    """Получает информацию о текущем пользователе."""
     return await service.get_by_id(user_id)
 
 
@@ -31,6 +33,7 @@ async def get_me(
 async def get_user_by_id(
     id: int, service: UserService = Depends(get_cached_user_service)
 ):
+    """Получает публичную информацию о пользователе по ID."""
     return await service.get_by_id(id)
 
 
@@ -41,4 +44,5 @@ async def become_seller(
     user_id: int = Depends(get_current_user_id),
     service: UserService = Depends(get_full_user_service),
 ):
+    """Делает текущего пользователя продавцом."""
     return await service.become_seller(user_id)

@@ -1,9 +1,14 @@
+# app/core/config.py
+"""Конфигурация приложения на основе переменных окружения."""
+
 from functools import cached_property
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Класс конфигурации приложения с переменными окружения."""
+
     FRONTEND_URL: str = "http://localhost:8000"
 
     # JWT
@@ -26,6 +31,7 @@ class Settings(BaseSettings):
 
     @cached_property
     def REDIS_URL_QUEUE(self) -> str:
+        """Возвращает URL для подключения к Redis очереди."""
         if not self.REDIS_PASSWORD:
             return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB_QUEUE}"
         return (
@@ -37,7 +43,7 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str = "user@gmail.com"
     MAIL_PASSWORD: str = "password"
     MAIL_FROM: str = "user@gmail.com"
-    MAIL_FROM_NAME: str = "CodeVenter"
+    MAIL_FROM_NAME: str = "CodeVenture"
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_STARTTLS: bool = True

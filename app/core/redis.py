@@ -1,3 +1,6 @@
+# app/core/redis.py
+"""Управление подключением к Redis и жизненным циклом приложения."""
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -13,6 +16,7 @@ redis_client: Redis | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Управляет инициализацией и завершением Redis и Taskiq."""
     global redis_pool, redis_client
 
     redis_pool = ConnectionPool(
@@ -43,4 +47,5 @@ async def lifespan(app: FastAPI):
 
 
 def get_redis_client() -> Redis:
+    """Возвращает глобальный экземпляр Redis клиента."""
     return redis_client
